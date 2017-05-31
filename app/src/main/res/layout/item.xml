@@ -14,9 +14,11 @@
 
         <ImageView
             android:id="@+id/imageViewUser"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_gravity="center"
+            android:background="#f1efef"
+            android:scaleType="fitXY"
             app:srcCompat="@mipmap/ic_launcher" />
 
         <LinearLayout

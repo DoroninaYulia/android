@@ -11,6 +11,8 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
+import com.example.yulia.myapplication.myclass.MyViewBinder;
+
 import static com.example.yulia.myapplication.database.DB.*;
 import static com.example.yulia.myapplication.MainActivity.userDB;
 
@@ -24,15 +26,16 @@ public class UserInfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_user_info);
 
         SQLiteDatabase db = userDB.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_NAME, new String[]{COLUMN_ID, COLUMN_NAME, COLUMN_LASTNAME}, null, null, null, null, null);
+        Cursor cursor = db.query(TABLE_NAME, new String[]{COLUMN_ID, COLUMN_NAME, COLUMN_LASTNAME, COLUMN_IMAGE}, null, null, null, null, null);
         cursor.moveToFirst();
 
         if (cursor.getCount() == 0) {
             Toast.makeText(this, "Database empty", Toast.LENGTH_SHORT).show();
         } else {
-            String[] from = new String[]{COLUMN_ID, COLUMN_NAME, COLUMN_LASTNAME};
-            int[] to = new int[]{R.id.tvId, R.id.tvName, R.id.tvLastName};
+            String[] from = new String[]{COLUMN_ID, COLUMN_NAME, COLUMN_LASTNAME, COLUMN_IMAGE};
+            int[] to = new int[]{R.id.tvId, R.id.tvName, R.id.tvLastName, R.id.imageViewUser};
             SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.item, cursor, from, to, 1);
+            adapter.setViewBinder(new MyViewBinder());
 
             lv = (ListView) findViewById(R.id.idLvUsers);
             lv.setAdapter(adapter);

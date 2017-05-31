@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Questionnaire</string>
+    <string name="phone_number">Phone number</string>
+    <string name="email">Email</string>
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
+    <string name="female">Female</string>
+    <string name="male">Male</string>
+    <string name="birth_date">Birth date</string>
+    <string name="show">SHOW</string>
+    <string name="edit">EDIT</string>
+    <string name="id">ID:</string>
+    <string name="name">Name:</string>
+    <string name="lastname">Lastname:</string>
+
+    <string-array name="skills">
+        <item>Select</item>
+        <item>English</item>
+        <item>German</item>
+        <item>French</item>
+    </string-array>
+</resources>

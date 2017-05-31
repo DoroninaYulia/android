@@ -2,6 +2,9 @@ package com.example.yulia.myapplication;
 
 import android.app.DialogFragment;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,6 +22,9 @@ import com.example.yulia.myapplication.database.DB;
 import com.example.yulia.myapplication.myclass.MyDatePicker;
 import com.example.yulia.myapplication.myclass.User;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnFocusChangeListener {
 
     private EditText firstName, lastName, email, phone, date;
@@ -34,8 +40,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static DB userDB;
 
     private String strName, strLastName, strEmail, strPhone, selectedSp, strDate, selectedRb;
-    private Integer userID;
-    private Integer  idRadioButton;
+    private Integer userID, idRadioButton;
+    private BitmapDrawable bmd;
+    private Bitmap photo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,30 +93,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 && idRadioButton != -1 && spSkills.getSelectedItemPosition() > 0) {
             switch (v.getId()) {
                 case R.id.btnEdit:
-                    user = new User(userID, strName, strLastName, strEmail, strPhone, selectedRb, strDate, selectedSp);
-                    userDB.updateUser(user);
-                    btn1.setVisibility(View.VISIBLE);
-                    btn2.setVisibility(View.VISIBLE);
-                    btn3.setVisibility(View.GONE);
-                    Toast.makeText(this, "Update successfully", Toast.LENGTH_SHORT).show();
+                    updateUser();
                     break;
                 case R.id.btnAdd:
-                    user = new User(strName, strLastName, strEmail, strPhone, selectedRb, strDate, selectedSp);
-                    userDB.addUser(user);
-                    Toast.makeText(this, "Added successfully", Toast.LENGTH_SHORT).show();
+                    addUser();
                     break;
             }
-
-            clearEditText(firstName, lastName, email, phone, date);
-            rgGender.clearCheck();
-            spSkills.setSelection(0);
+            clearForm(firstName, lastName, email, phone, date);
         } else if (v.getId() == R.id.btnShow){
             startActivityForResult(mIntent, KeyOfActivity.RESULT_CODE);
         }
         else {
             Toast.makeText(this, "Empty field", Toast.LENGTH_SHORT).show();
         }
+    }
 
+    public void updateUser(){
+        try{
+            user = new User(userID, strName, strLastName, strEmail, strPhone, selectedRb, strDate, selectedSp, photo);
+            userDB.updateUser(user);
+            btn1.setVisibility(View.VISIBLE);
+            btn2.setVisibility(View.VISIBLE);
+            btn3.setVisibility(View.GONE);
+            Toast.makeText(this, "Update successfully", Toast.LENGTH_SHORT).show();
+        }catch (Exception e){
+            Toast.makeText(this, "Unable to update", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void addUser(){
+        try{
+            user = new User(strName, strLastName, strEmail, strPhone, selectedRb, strDate, selectedSp, photo);
+            userDB.addUser(user);
+            Toast.makeText(this, "Added successfully", Toast.LENGTH_SHORT).show();
+        }catch (Exception e){
+            Toast.makeText(this, "Unable to add", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -141,12 +160,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             RadioButton radioButton = (RadioButton) rgGender.getChildAt(radioId);
             selectedRb = (String) radioButton.getText();
         }
+
+        bmd = ((BitmapDrawable) imageView.getDrawable());
+        photo = bmd.getBitmap();
     }
 
-    private void clearEditText(EditText... editTexts) {
+    private void clearForm(EditText... editTexts) {
         for (EditText e : editTexts) {
             e.setText("");
         }
+
+        rgGender.clearCheck();
+        spSkills.setSelection(0);
+        imageView.setImageResource(R.mipmap.ic_launcher);
     }
 
     @Override
@@ -154,8 +180,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (requestCode) {
             case KeyOfActivity.SELECT_PICTURE:
                 if (resultCode == RESULT_OK) {
-                    Uri uri = data.getData();
-                    imageView.setImageURI(uri);
+                    try{
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inScaled = true;
+                        Uri uri = data.getData();
+                        InputStream stream = getContentResolver().openInputStream(uri);
+                        Bitmap selectImg = BitmapFactory.decodeStream(stream, null, options);
+                        imageView.setImageBitmap(selectImg);
+                    }catch(FileNotFoundException ex){
+                        Toast.makeText(this, "Image was not found", Toast.LENGTH_SHORT).show();
+                    }
                 }
                 break;
             case KeyOfActivity.RESULT_CODE:
@@ -187,10 +221,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             male.setChecked(true);
         }
-
         ArrayAdapter adapter = (ArrayAdapter) spSkills.getAdapter();
         int posAdapter = adapter.getPosition(user.getSkills());
         spSkills.setSelection(posAdapter);
+        imageView.setImageBitmap(user.getBitmap());
     }
 
 

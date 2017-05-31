@@ -20,7 +20,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_marginRight="10dp"
-            android:background="#f1efef"
+
             app:srcCompat="@mipmap/ic_launcher" />
 
         <LinearLayout
@@ -172,5 +172,8 @@
         android:visibility="gone"/>
 
 </LinearLayout>
+
+
+<!--android:background="#f1efef"-->
 
 

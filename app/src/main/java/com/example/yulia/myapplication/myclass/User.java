@@ -2,7 +2,6 @@ package com.example.yulia.myapplication.myclass;
 
 import android.graphics.Bitmap;
 
-
 public class User {
     private Integer _id;
     private String name;
@@ -12,11 +11,12 @@ public class User {
     private String gender;
     private String birthDay;
     private String skills;
+    private Bitmap bitmap;
 
     public User(){
     }
 
-    public User(Integer _id, String name, String lastName, String email, String phoneNumber, String gender, String birthDay, String skills) {
+    public User(Integer _id, String name, String lastName, String email, String phoneNumber, String gender, String birthDay, String skills, Bitmap bitmap) {
         this._id = _id;
         this.name = name;
         this.lastName = lastName;
@@ -25,9 +25,10 @@ public class User {
         this.gender = gender;
         this.birthDay = birthDay;
         this.skills = skills;
+        this.bitmap = bitmap;
     }
 
-    public User(String name, String lastName, String email, String phoneNumber, String gender, String birthDay, String skills) {
+    public User(String name, String lastName, String email, String phoneNumber, String gender, String birthDay, String skills, Bitmap bitmap) {
         this.name = name;
         this.lastName = lastName;
         this.email = email;
@@ -35,6 +36,7 @@ public class User {
         this.gender = gender;
         this.birthDay = birthDay;
         this.skills = skills;
+        this.bitmap = bitmap;
     }
 
     public String getName() {
@@ -134,6 +136,14 @@ public class User {
         this.skills = skills;
     }
 
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
+    }
+
+    public Bitmap getBitmap() {
+        return bitmap;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -145,6 +155,8 @@ public class User {
                 ", gender='" + gender + '\'' +
                 ", birthDay='" + birthDay + '\'' +
                 ", skills='" + skills + '\'' +
+                ", bitmap=" + bitmap +
                 '}';
     }
+
 }

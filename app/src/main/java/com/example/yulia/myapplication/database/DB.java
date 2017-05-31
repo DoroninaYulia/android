@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.example.yulia.myapplication.myclass.ConvertImage;
 import com.example.yulia.myapplication.myclass.User;
 
 public class DB extends SQLiteOpenHelper {
@@ -18,6 +19,7 @@ public class DB extends SQLiteOpenHelper {
     private static final String COLUMN_GENDER = "gender";
     private static final String COLUMN_BIRTHDAY = "birthday";
     private static final String COLUMN_SKILLS = "skills";
+    public static final String COLUMN_IMAGE = "image";
     public static final String TABLE_NAME = "userTable";
 
     public DB(Context context) {
@@ -34,7 +36,8 @@ public class DB extends SQLiteOpenHelper {
                 COLUMN_PHONENUMBER + " INTEGER," +
                 COLUMN_GENDER + " TEXT," +
                 COLUMN_BIRTHDAY + " TEXT," +
-                COLUMN_SKILLS + " TEXT);";
+                COLUMN_SKILLS + " TEXT," +
+                COLUMN_IMAGE + " BLOB);";
 
         db.execSQL(create_table);
     }
@@ -54,6 +57,8 @@ public class DB extends SQLiteOpenHelper {
         cv.put(COLUMN_GENDER, user.getGender());
         cv.put(COLUMN_BIRTHDAY, user.getBirthDay());
         cv.put(COLUMN_SKILLS, user.getSkills());
+        cv.put(COLUMN_IMAGE, ConvertImage.getBytes(user.getBitmap()));
+
         SQLiteDatabase db = this.getWritableDatabase();
         db.insert(TABLE_NAME, null, cv);
         db.close();
@@ -77,7 +82,6 @@ public class DB extends SQLiteOpenHelper {
 
             db.execSQL(queryUpdate);
         }
-
         db.close();
     }
 
@@ -95,18 +99,19 @@ public class DB extends SQLiteOpenHelper {
         User user = new User();
 
         if (cursor.moveToFirst()) {
-            user.setName(cursor.getString(1));
-            user.setLastName(cursor.getString(2));
-            user.setEmail(cursor.getString(3));
-            user.setPhoneNumber(cursor.getString(4));
-            user.setGender(cursor.getString(5));
-            user.setBirthDay(cursor.getString(6));
-            user.setSkills(cursor.getString(7));
+            user.setName(cursor.getString(cursor.getColumnIndex(COLUMN_NAME)));
+            user.setLastName(cursor.getString(cursor.getColumnIndex(COLUMN_LASTNAME)));
+            user.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_EMAIL)));
+            user.setPhoneNumber(cursor.getString(cursor.getColumnIndex(COLUMN_PHONENUMBER)));
+            user.setGender(cursor.getString(cursor.getColumnIndex(COLUMN_GENDER)));
+            user.setBirthDay(cursor.getString(cursor.getColumnIndex(COLUMN_BIRTHDAY)));
+            user.setSkills(cursor.getString(cursor.getColumnIndex(COLUMN_SKILLS)));
+            byte []blob = cursor.getBlob(cursor.getColumnIndex(COLUMN_IMAGE));
+            user.setBitmap(ConvertImage.getImage(blob));
             cursor.close();
         } else {
             user = null;
         }
-
         return user;
     }
 

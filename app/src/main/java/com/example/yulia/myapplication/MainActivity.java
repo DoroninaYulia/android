@@ -25,10 +25,13 @@ import com.example.yulia.myapplication.myclass.User;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
+import static com.example.yulia.myapplication.KeyOfActivity.KEY_ADD;
+import static com.example.yulia.myapplication.KeyOfActivity.KEY_UPDATE;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnFocusChangeListener {
 
     private EditText firstName, lastName, email, phone, date;
-    private Button btn1, btn2, btn3;
+    private Button btn1, btn2, btn3, btn4;
     private RadioGroup rgGender;
     private RadioButton female, male;
     private Spinner spSkills;
@@ -66,6 +69,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn1.setOnClickListener(this);
         btn2.setOnClickListener(this);
         btn3.setOnClickListener(this);
+        btn4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (userDB.deleteAllUser()) {
+                    Toast.makeText(MainActivity.this, "Removed successfully", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Table is empty, nothing to remove", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
         date.setOnFocusChangeListener(this);
     }
 
@@ -78,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn1 = (Button) findViewById(R.id.btnShow);
         btn2 = (Button) findViewById(R.id.btnAdd);
         btn3 = (Button) findViewById(R.id.btnEdit);
+        btn4 = (Button) findViewById(R.id.btnDelete);
         rgGender = (RadioGroup) findViewById(R.id.radioGroup);
         female = (RadioButton) findViewById(R.id.rbFemale);
         male = (RadioButton) findViewById(R.id.rbMale);
@@ -100,33 +114,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
             }
             clearForm(firstName, lastName, email, phone, date);
-        } else if (v.getId() == R.id.btnShow){
+        } else if (v.getId() == R.id.btnShow) {
             startActivityForResult(mIntent, KeyOfActivity.RESULT_CODE);
-        }
-        else {
+        } else {
             Toast.makeText(this, "Empty field", Toast.LENGTH_SHORT).show();
         }
     }
 
-    public void updateUser(){
-        try{
+    public void updateUser() {
+        try {
             user = new User(userID, strName, strLastName, strEmail, strPhone, selectedRb, strDate, selectedSp, photo);
-            userDB.updateUser(user);
-            btn1.setVisibility(View.VISIBLE);
-            btn2.setVisibility(View.VISIBLE);
-            btn3.setVisibility(View.GONE);
+            userDB.action(user, KEY_UPDATE);
             Toast.makeText(this, "Update successfully", Toast.LENGTH_SHORT).show();
-        }catch (Exception e){
+        } catch (Exception e) {
             Toast.makeText(this, "Unable to update", Toast.LENGTH_SHORT).show();
         }
+
+        btn1.setVisibility(View.VISIBLE);
+        btn2.setVisibility(View.VISIBLE);
+        btn3.setVisibility(View.GONE);
+        btn4.setVisibility(View.VISIBLE);
     }
 
-    public void addUser(){
-        try{
+    public void addUser() {
+        try {
             user = new User(strName, strLastName, strEmail, strPhone, selectedRb, strDate, selectedSp, photo);
-            userDB.addUser(user);
+            userDB.action(user, KEY_ADD);
             Toast.makeText(this, "Added successfully", Toast.LENGTH_SHORT).show();
-        }catch (Exception e){
+        } catch (Exception e) {
             Toast.makeText(this, "Unable to add", Toast.LENGTH_SHORT).show();
         }
     }
@@ -180,14 +195,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (requestCode) {
             case KeyOfActivity.SELECT_PICTURE:
                 if (resultCode == RESULT_OK) {
-                    try{
+                    try {
                         BitmapFactory.Options options = new BitmapFactory.Options();
                         options.inScaled = true;
                         Uri uri = data.getData();
                         InputStream stream = getContentResolver().openInputStream(uri);
                         Bitmap selectImg = BitmapFactory.decodeStream(stream, null, options);
                         imageView.setImageBitmap(selectImg);
-                    }catch(FileNotFoundException ex){
+                    } catch (FileNotFoundException ex) {
                         Toast.makeText(this, "Image was not found", Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -197,6 +212,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 btn1.setVisibility(View.GONE);
                 btn2.setVisibility(View.GONE);
                 btn3.setVisibility(View.VISIBLE);
+                btn4.setVisibility(View.GONE);
 
                 userID = data.getExtras().getInt(KeyOfActivity.KEY_1);
                 fillFields();
@@ -206,7 +222,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void fillFields() {
         User user = userDB.findUser(userID);
-        if(user == null){
+        if (user == null) {
             Toast.makeText(this, "User null", Toast.LENGTH_SHORT).show();
             return;
         }

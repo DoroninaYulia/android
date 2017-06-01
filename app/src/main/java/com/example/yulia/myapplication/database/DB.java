@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.example.yulia.myapplication.myclass.ConvertImage;
 import com.example.yulia.myapplication.myclass.User;
 
+import static com.example.yulia.myapplication.KeyOfActivity.*;
+
 public class DB extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "userDB";
     public static final String COLUMN_ID = "_id";
@@ -48,7 +50,8 @@ public class DB extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void addUser(User user) {
+    public void action(User user, int key) {
+        SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_NAME, user.getName());
         cv.put(COLUMN_LASTNAME, user.getLastName());
@@ -59,37 +62,30 @@ public class DB extends SQLiteOpenHelper {
         cv.put(COLUMN_SKILLS, user.getSkills());
         cv.put(COLUMN_IMAGE, ConvertImage.getBytes(user.getBitmap()));
 
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.insert(TABLE_NAME, null, cv);
-        db.close();
-    }
-
-    public void updateUser(User user) {
-        String querySelect = "SELECT *FROM " + TABLE_NAME + " WHERE " + COLUMN_ID + " = " + user.getId();
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(querySelect, null);
-
-        if (cursor.moveToFirst()) {
-            String queryUpdate = "UPDATE " + TABLE_NAME + " SET " +
-                    COLUMN_NAME + " = \"" + user.getName() + "\", " +
-                    COLUMN_LASTNAME + " = \"" + user.getLastName() + "\", " +
-                    COLUMN_EMAIL + " = \"" + user.getEmail() + "\", " +
-                    COLUMN_PHONENUMBER + " = \"" + user.getPhoneNumber() + "\", " +
-                    COLUMN_GENDER + " = \"" + user.getGender() + "\", " +
-                    COLUMN_BIRTHDAY + " = \"" + user.getBirthDay() + "\", " +
-                    COLUMN_SKILLS + " = \"" + user.getSkills() + "\" " +
-                    "WHERE " + COLUMN_ID + " = " + user.getId();
-
-            db.execSQL(queryUpdate);
+        switch (key) {
+            case KEY_ADD:
+                db.insert(TABLE_NAME, null, cv);
+                break;
+            case KEY_UPDATE:
+                db.update(TABLE_NAME, cv, COLUMN_ID + " = " + user.getId(), null);
+                break;
         }
         db.close();
     }
 
-    public void deleteAllUser() {
-        String queryDelete = "DELETE FROM " + TABLE_NAME;
+    public boolean deleteAllUser() {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL(queryDelete);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME, null);
+
+        if (cursor.moveToFirst()) {
+            String queryDelete = "DELETE FROM " + TABLE_NAME;
+            db.execSQL(queryDelete);
+            db.close();
+            return true;
+        }
+
         db.close();
+        return false;
     }
 
     public User findUser(Integer id) {
@@ -106,7 +102,7 @@ public class DB extends SQLiteOpenHelper {
             user.setGender(cursor.getString(cursor.getColumnIndex(COLUMN_GENDER)));
             user.setBirthDay(cursor.getString(cursor.getColumnIndex(COLUMN_BIRTHDAY)));
             user.setSkills(cursor.getString(cursor.getColumnIndex(COLUMN_SKILLS)));
-            byte []blob = cursor.getBlob(cursor.getColumnIndex(COLUMN_IMAGE));
+            byte[] blob = cursor.getBlob(cursor.getColumnIndex(COLUMN_IMAGE));
             user.setBitmap(ConvertImage.getImage(blob));
             cursor.close();
         } else {
